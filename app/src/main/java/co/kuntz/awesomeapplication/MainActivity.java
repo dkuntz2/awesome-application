@@ -28,10 +28,12 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d(TAG, "Touch event changing color");
-        View view = getWindow().getDecorView().findViewById(R.id.main_layout);
-        Random random = new Random();
-        view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            Log.d(TAG, "Touch event changing color");
+            View view = getWindow().getDecorView().findViewById(R.id.main_layout);
+            Random random = new Random();
+            view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+        }
 
         return super.onTouchEvent(event);
     }
@@ -103,7 +105,7 @@ public class MainActivity extends ActionBarActivity {
 
 
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(5000);
                     } catch (Exception e) {
                         //TextView text = (TextView) getWindow().getDecorView().findViewById(R.id.text);
                         //text.setText("Something terrible happened!");
