@@ -15,33 +15,7 @@ import java.util.Random;
 public class MainActivity extends ActionBarActivity {
     public static final String TAG = MainActivity.class.getName();
 
-    private AsyncTask<View, Void, Void> backgroundTask = new AsyncTask<View, Void, Void>() {
-        protected Void doInBackground(View... views) {
-            while (true) {
-                Log.d(TAG, "Changing background color");
-                final Random random = new Random();
-                final View view = views[0];
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
-                        view.refreshDrawableState();
-                    }
-                });
-
-
-                try {
-                    Thread.sleep(2000);
-                } catch (Exception e) {
-                    TextView text = (TextView) getWindow().getDecorView().findViewById(R.id.text);
-                    text.setText("Something terrible happened!");
-                    break;
-                }
-            }
-            return null;
-        }
-    };
+    private AsyncTask<View, Void, Void> backgroundTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +54,7 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
 
         View view = getWindow().getDecorView().findViewById(R.id.main_layout);
+        backgroundTask = gimmeBackgroundTask();
         backgroundTask.execute(view);
     }
 
@@ -93,5 +68,43 @@ public class MainActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
         backgroundTask.cancel(true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        backgroundTask.cancel(true);
+    }
+
+    public AsyncTask<View, Void, Void> gimmeBackgroundTask() {
+        return new AsyncTask<View, Void, Void>() {
+            protected Void doInBackground(View... views) {
+                while (true) {
+                    Log.d(TAG, "Changing background color");
+                    final Random random = new Random();
+                    final View view = views[0];
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+                            view.refreshDrawableState();
+                        }
+                    });
+
+
+                    try {
+                        Thread.sleep(2000);
+                    } catch (Exception e) {
+                        //TextView text = (TextView) getWindow().getDecorView().findViewById(R.id.text);
+                        //text.setText("Something terrible happened!");
+                        Log.e(TAG, "Error changing backgrounds", e);
+                        Log.
+                        break;
+                    }
+                }
+                return null;
+            }
+        };
     }
 }
