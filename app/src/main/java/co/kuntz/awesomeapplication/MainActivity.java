@@ -99,7 +99,6 @@ public class MainActivity extends ActionBarActivity {
                         //TextView text = (TextView) getWindow().getDecorView().findViewById(R.id.text);
                         //text.setText("Something terrible happened!");
                         Log.e(TAG, "Error changing backgrounds", e);
-                        Log.
                         break;
                     }
                 }
