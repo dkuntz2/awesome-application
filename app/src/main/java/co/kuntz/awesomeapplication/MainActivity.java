@@ -24,15 +24,14 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         Log.d(TAG, "Starting application");
+        changeBackgroundColor();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             Log.d(TAG, "Touch event changing color");
-            View view = getWindow().getDecorView().findViewById(R.id.main_layout);
-            Random random = new Random();
-            view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+            changeBackgroundColor();
         }
 
         return super.onTouchEvent(event);
@@ -64,9 +63,11 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
-        View view = getWindow().getDecorView().findViewById(R.id.main_layout);
+        View view = getWindow().getDecorView().findViewById(R.id.hello_world);
         backgroundTask = gimmeBackgroundTask();
         backgroundTask.execute(view);
+
+        changeBackgroundColor();
     }
 
     @Override
@@ -91,15 +92,17 @@ public class MainActivity extends ActionBarActivity {
         return new AsyncTask<View, Void, Void>() {
             protected Void doInBackground(View... views) {
                 while (true) {
-                    Log.d(TAG, "Changing background color");
-                    final Random random = new Random();
-                    final View view = views[0];
+                    Log.d(TAG, "Changing hello text");
+
+                    final TextView helloWorld = (TextView)views[0];
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
-                            view.refreshDrawableState();
+                            String[] hellos = getResources().getStringArray(R.array.hellos);
+                            final Random random = new Random();
+
+                            helloWorld.setText(hellos[random.nextInt(hellos.length)] + "!");
                         }
                     });
 
@@ -109,12 +112,18 @@ public class MainActivity extends ActionBarActivity {
                     } catch (Exception e) {
                         //TextView text = (TextView) getWindow().getDecorView().findViewById(R.id.text);
                         //text.setText("Something terrible happened!");
-                        Log.e(TAG, "Error changing backgrounds", e);
+                        Log.e(TAG, "Error changing text", e);
                         break;
                     }
                 }
                 return null;
             }
         };
+    }
+
+    private void changeBackgroundColor() {
+        View view = getWindow().getDecorView().findViewById(R.id.main_layout);
+        Random random = new Random();
+        view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
     }
 }

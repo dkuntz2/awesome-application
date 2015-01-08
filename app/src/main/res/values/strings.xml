@@ -5,4 +5,21 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
+    <array name="hellos">
+        <item>Hello world</item>
+        <item>Hola mundo</item>
+        <item>Moni dziko lapansi</item>
+        <item>Pozdrav svima</item>
+        <item>Hallo wereld</item>
+        <item>Saluton mondo</item>
+        <item>Bonjour le monde</item>
+        <item>Ola mundo</item>
+        <item>Hallo Welt</item>
+        <item>Sannu Duniya</item>
+        <item>Halló heimur</item>
+        <item>Dia duit ar domhan</item>
+        <item>Sveiki pasaulis</item>
+        <item>Helo byd</item>
+    </array>
+
 </resources>
