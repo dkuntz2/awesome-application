@@ -1,5 +1,8 @@
 package co.kuntz.awesomeapplication;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -15,8 +18,11 @@ import java.util.Random;
 
 public class MainActivity extends ActionBarActivity {
     public static final String TAG = MainActivity.class.getName();
+    public static final String PREFS_FILE = MainActivity.class.getCanonicalName() + ".preferences";
 
-    private AsyncTask<View, Void, Void> backgroundTask;
+    private int[] colors = new int[3];
+
+    private AsyncTask<View, Void, Void> colorChangingTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,13 +31,19 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d(TAG, "Starting application");
         changeBackgroundColor();
+
+        getColorsFromSharedPreferences();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            Log.d(TAG, "Touch event changing color");
-            changeBackgroundColor();
+            Log.d(TAG, "Touch event changing hello world text");
+
+            TextView helloText = (TextView) getWindow().getDecorView().findViewById(R.id.hello_world);
+
+            String[] hellos = getResources().getStringArray(R.array.hellos);
+            helloText.setText(hellos[new Random().nextInt(hellos.length)] + "!");
         }
 
         return super.onTouchEvent(event);
@@ -63,49 +75,64 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
-        View view = getWindow().getDecorView().findViewById(R.id.hello_world);
-        backgroundTask = gimmeBackgroundTask();
-        backgroundTask.execute(view);
+        getColorsFromSharedPreferences();
 
-        changeBackgroundColor();
+        View view = getWindow().getDecorView().findViewById(R.id.main_layout);
+        colorChangingTask = gimmeBackgroundTask();
+        colorChangingTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, view);
+
+        TextView helloText = (TextView) getWindow().getDecorView().findViewById(R.id.hello_world);
+
+        String[] hellos = getResources().getStringArray(R.array.hellos);
+        helloText.setText(hellos[new Random().nextInt(hellos.length)] + "!");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        backgroundTask.cancel(true);
+        colorChangingTask.cancel(true);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        backgroundTask.cancel(true);
+        colorChangingTask.cancel(true);
+
+        saveColorToSharedPreferences();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        backgroundTask.cancel(true);
+        colorChangingTask.cancel(true);
     }
 
     public AsyncTask<View, Void, Void> gimmeBackgroundTask() {
         return new AsyncTask<View, Void, Void>() {
             protected Void doInBackground(View... views) {
                 while (true) {
-                    Log.d(TAG, "Changing hello text");
+                    Log.d(TAG, "Changing background color");
 
-                    final TextView helloWorld = (TextView)views[0];
+                    final View view = views[0];
+                    final int initialColor = Color.rgb(colors[0], colors[1], colors[2]);
+                    Random random = new Random();
 
+                    for (int i = 0; i < 3; i++) {
+                        colors[i] = random.nextInt(256);
+                    }
+
+                    final int endColor = Color.rgb(colors[0], colors[1], colors[2]);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            String[] hellos = getResources().getStringArray(R.array.hellos);
-                            final Random random = new Random();
-
-                            helloWorld.setText(hellos[random.nextInt(hellos.length)] + "!");
+                            ObjectAnimator animator = ObjectAnimator.ofObject(view, "backgroundColor", new ArgbEvaluator(), initialColor, endColor);
+                            animator.setDuration(5000);
+                            animator.start();
+                            //view.setBackgroundColor(Color.rgb(colors[0], colors[1], colors[2]));
                         }
                     });
 
+                    saveColorToSharedPreferences();
 
                     try {
                         Thread.sleep(5000);
@@ -124,6 +151,26 @@ public class MainActivity extends ActionBarActivity {
     private void changeBackgroundColor() {
         View view = getWindow().getDecorView().findViewById(R.id.main_layout);
         Random random = new Random();
-        view.setBackgroundColor(Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+
+        view.setBackgroundColor(Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256)));
+    }
+
+    private void getColorsFromSharedPreferences() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_FILE, 0);
+
+        colors[0] = prefs.getInt("red", 145);
+        colors[1] = prefs.getInt("green", 243);
+        colors[2] = prefs.getInt("blue", 214);
+    }
+
+    private void saveColorToSharedPreferences() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_FILE, 0);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        editor.putInt("red", colors[0]);
+        editor.putInt("green", colors[1]);
+        editor.putInt("blue", colors[2]);
+
+        editor.commit();
     }
 }
